@@ -11,7 +11,7 @@
 <body>
     <!--img style="transform: rotate(180deg);" alt="Vue logo" src="assets/logo.png"-->
     <h1 class="header">Absolution - The Final Chapter</h1>
-    <button class="btn btn-default" onclick="toggleEdit()" style="">Edit Mode</button>
+    <button class="btn btn-default" onclick="toggleEdit()" style="text-align: left">Edit Mode</button>
     <div class="row" id="AddDialog" style="display:none">
         <input class="form-control col-md-2" placeholder="Server" type="text" id="servername"/>
         <input class="form-control col-md-2" placeholder="Charakter Name" type="text" id="charname"/>
@@ -99,7 +99,9 @@ getData();
          const tdilvl = document.createElement('td');
          const tdMplus = document.createElement('td');
 
-         tdChar.innerHTML = `<a target="_blank" href="https://raider.io/characters/eu/${item.ServerName}/${item.CharName}">${item.CharName}</a>`;
+         const riolink = `<a target="_blank" href="https://raider.io/characters/eu/${item.ServerName}/${item.CharName}"><img alt="Vue logo" src="assets/raiderio-16x16.webp"></a>`;
+         const wlogslink = `<a target="_blank" href="https://www.warcraftlogs.com/character/eu/${item.ServerName}/${item.CharName}"><img alt="Vue logo" src="assets/warcraftlogs.png"></a>`;
+         tdChar.innerHTML = `${riolink} ${wlogslink}   ${item.CharName}`;
          tdClass.textContent = item.Class
          tdSpec.textContent = item.Spec;
          tdCov.textContent = `${item.Covenant} (Renown: ${item.Renown})`;
