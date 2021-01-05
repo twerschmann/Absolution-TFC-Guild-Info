@@ -56,6 +56,10 @@ app.get('/getData', async (request, response) => {
             const charname = item.CharName;
             const fetch_response = await fetch(`https://eu.api.blizzard.com/profile/wow/character/${server}/${charname}?namespace=profile-eu&locale=en_GB&access_token=${apiKey}`);
             const json = await fetch_response.json();
+
+            const fetch_response_mplus = await fetch(`https://raider.io/api/v1/characters/profile?region=eu&realm=${server}&name=${charname}&fields=mythic_plus_scores`);
+            const json_mplus = await fetch_response_mplus.json();
+
             const player = {
                 CharName: json.name,
                 ServerName: json.realm.name,
@@ -63,7 +67,8 @@ app.get('/getData', async (request, response) => {
                 Class: json.character_class.name,
                 Spec: json.active_spec.name,
                 Covenant: json.covenant_progress.chosen_covenant.name,
-                Renown: json.covenant_progress.renown_level
+                Renown: json.covenant_progress.renown_level,
+                MplusScore: json_mplus.mythic_plus_scores.all
             }
             charData.push(player);
         }

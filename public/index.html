@@ -78,8 +78,11 @@ getData();
      const thilvl = document.createElement('th');
      thilvl.textContent = 'Item Level';
      thilvl.scope = 'col';
+     const thMplus= document.createElement('th');
+     thMplus.textContent = 'Mythic Plus Score';
+     thMplus.scope = 'col';
 
-     tr.append(thChar, thSpec,thCov, thilvl);
+     tr.append(thChar, thSpec,thCov, thilvl,thMplus);
      thead.append(tr);
      table.append(thead);
 
@@ -90,13 +93,15 @@ getData();
          const tdSpec = document.createElement('td');
          const tdCov = document.createElement('td');
          const tdilvl = document.createElement('td');
+         const tdMplus = document.createElement('td');
 
          tdChar.innerHTML = `<a target="_blank" href="https://raider.io/characters/eu/${item.ServerName}/${item.CharName}">${item.CharName}(${item.ServerName})</a>`;
          tdSpec.textContent = `${item.Spec} ${item.Class}`;
          tdCov.textContent = `${item.Covenant} (Renown: ${item.Renown})`;
          tdilvl.textContent = item.Itemlvl;
+         tdMplus.textContent = item.MplusScore;
 
-         trbody.append(tdChar, tdSpec,tdCov, tdilvl);
+         trbody.append(tdChar, tdSpec,tdCov, tdilvl,tdMplus);
          tbody.append(trbody);
      }
      table.append(tbody);
