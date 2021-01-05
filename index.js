@@ -3,13 +3,14 @@ const Datastore = require('nedb');
 const fetch = require("node-fetch");
 require('dotenv').config();
 
+const apiKey = process.env.API_KEY;
+const port = process.env.PORT || 8080;
 
 const app = express();
-app.listen(8080, () => console.log('hört'));
+app.listen(port, () => console.log(`Hört auf ${port}`));
 app.use(express.static('public'));
 app.use(express.json({limit:'2mb'}));
 
-const apiKey = process.env.API_KEY;
 
 const database = new Datastore({filename: 'database.db'});
 database.loadDatabase();
