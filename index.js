@@ -19,12 +19,12 @@ app.post('/addChar', async (req, res) =>{
     const data = req.body;
     const server = data.ServerName.toLowerCase();
     const charname = data.CharName.toLowerCase();
-
+    console.log(charname);
     if(server && charname) {
         const fetch_response = await fetch(`https://eu.api.blizzard.com/profile/wow/character/${server}/${charname}?namespace=profile-eu&locale=en_GB&access_token=${apiKey}`);
         const json = await fetch_response.json();
         if (json.code) {
-            console.log('char not found');
+            console.log(json);
         } else {
             database.count({CharName: charname, ServerName: server}, (err, count) => {
                 if (count < 1) {
@@ -68,7 +68,7 @@ app.get('/getData', async (request, response) => {
                 Spec: json.active_spec.name,
                 Covenant: json.covenant_progress.chosen_covenant.name,
                 Renown: json.covenant_progress.renown_level,
-                MplusScore: json_mplus.mythic_plus_scores.all
+                MplusScore: json_mplus.mythic_plus_scores.all || 0
             }
             charData.push(player);
         }

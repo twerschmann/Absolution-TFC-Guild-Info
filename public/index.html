@@ -6,7 +6,7 @@
     <title>Absolution - The Final Chapter</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="styles/class_colors.css">
 </head>
 <body>
     <!--img style="transform: rotate(180deg);" alt="Vue logo" src="assets/logo.png"-->
@@ -62,15 +62,18 @@ getData();
      }
 
      const table = document.createElement('table');
-     table.className = 'table';
+     table.className = 'table table-striped';
      table.id = 'table';
      const thead = document.createElement('thead');
      const tr = document.createElement('tr');
      const thChar = document.createElement('th');
      thChar.textContent = 'Charackter';
      thChar.scope = 'col';
+     const thClass = document.createElement('th');
+     thClass.textContent = 'Klasse';
+     thClass.scope = 'col';
      const thSpec = document.createElement('th');
-     thSpec.textContent = 'Klasse';
+     thSpec.textContent = 'Spezialisierung';
      thSpec.scope = 'col';
      const thCov= document.createElement('th');
      thCov.textContent = 'Covenant';
@@ -82,7 +85,7 @@ getData();
      thMplus.textContent = 'Mythic Plus Score';
      thMplus.scope = 'col';
 
-     tr.append(thChar, thSpec,thCov, thilvl,thMplus);
+     tr.append(thChar, thClass, thSpec, thCov, thilvl, thMplus);
      thead.append(tr);
      table.append(thead);
 
@@ -90,20 +93,27 @@ getData();
      for(item of data){
          const trbody = document.createElement('tr');
          const tdChar = document.createElement('td');
+         const tdClass = document.createElement('td');
          const tdSpec = document.createElement('td');
          const tdCov = document.createElement('td');
          const tdilvl = document.createElement('td');
          const tdMplus = document.createElement('td');
 
-         tdChar.innerHTML = `<a target="_blank" href="https://raider.io/characters/eu/${item.ServerName}/${item.CharName}">${item.CharName}(${item.ServerName})</a>`;
-         tdSpec.textContent = `${item.Spec} ${item.Class}`;
+         tdChar.innerHTML = `<a target="_blank" href="https://raider.io/characters/eu/${item.ServerName}/${item.CharName}">${item.CharName}</a>`;
+         tdClass.textContent = item.Class
+         tdSpec.textContent = item.Spec;
          tdCov.textContent = `${item.Covenant} (Renown: ${item.Renown})`;
+         tdCov.style = 'text-align:left';
          tdilvl.textContent = item.Itemlvl;
          tdMplus.textContent = item.MplusScore;
 
-         trbody.append(tdChar, tdSpec,tdCov, tdilvl,tdMplus);
+         trbody.append(tdChar, tdClass, tdSpec, tdCov, tdilvl, tdMplus);
+
+         setClassColor(trbody,item.Class)
+
          tbody.append(trbody);
      }
+     table.style = 'text-align:left;';
      table.append(tbody);
      document.body.append(table);
  }
@@ -135,7 +145,7 @@ getData();
         margin: 3px;
     }
     a{
-        color: white;
+        color: inherit;
     }
     .header{
         margin: 150px;
