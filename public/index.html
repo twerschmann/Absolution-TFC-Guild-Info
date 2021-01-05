@@ -11,7 +11,7 @@
 <body>
     <!--img style="transform: rotate(180deg);" alt="Vue logo" src="assets/logo.png"-->
     <h1 class="header">Absolution - The Final Chapter</h1>
-    <button class="btn btn-default" onclick="toggleEdit()" style="al">Edit Mode</button>
+    <button class="btn btn-default" onclick="toggleEdit()" style="">Edit Mode</button>
     <div class="row" id="AddDialog" style="display:none">
         <input class="form-control col-md-2" placeholder="Server" type="text" id="servername"/>
         <input class="form-control col-md-2" placeholder="Charakter Name" type="text" id="charname"/>
@@ -54,6 +54,7 @@ getData();
  async function getData(){
      const response = await fetch('/getData');
      const data = await response.json();
+     console.log(data);
 
      const element = document.getElementById('table')
      if(element){
@@ -71,11 +72,14 @@ getData();
      const thSpec = document.createElement('th');
      thSpec.textContent = 'Klasse';
      thSpec.scope = 'col';
+     const thCov= document.createElement('th');
+     thCov.textContent = 'Covenant';
+     thCov.scope = 'col';
      const thilvl = document.createElement('th');
      thilvl.textContent = 'Item Level';
      thilvl.scope = 'col';
 
-     tr.append(thChar, thSpec, thilvl);
+     tr.append(thChar, thSpec,thCov, thilvl);
      thead.append(tr);
      table.append(thead);
 
@@ -84,44 +88,25 @@ getData();
          const trbody = document.createElement('tr');
          const tdChar = document.createElement('td');
          const tdSpec = document.createElement('td');
+         const tdCov = document.createElement('td');
          const tdilvl = document.createElement('td');
 
          tdChar.innerHTML = `<a target="_blank" href="https://raider.io/characters/eu/${item.ServerName}/${item.CharName}">${item.CharName}(${item.ServerName})</a>`;
          tdSpec.textContent = `${item.Spec} ${item.Class}`;
+         tdCov.textContent = `${item.Covenant} (Renown: ${item.Renown})`;
          tdilvl.textContent = item.Itemlvl;
 
-         trbody.append(tdChar, tdSpec, tdilvl);
+         trbody.append(tdChar, tdSpec,tdCov, tdilvl);
          tbody.append(trbody);
      }
      table.append(tbody);
      document.body.append(table);
  }
 
-    const hide = (elem) => {
-        elem.style.display = 'none';
-    }
 
-    // show an element
-    const show = (elem) => {
-        elem.style.display = 'flex';
-    }
-
-    // toggle the element visibility
-    const toggle = (elem) => {
-
-        // if the element is visible, hide it
-        if(window.getComputedStyle(elem).display !== 'none') {
-            hide(elem);
-            return;
-        }
-
-        // show the element
-        show(elem);
-    }
 </script>
 
-
-
+<script src="js/ElementUtility.js"></script>
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>

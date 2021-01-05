@@ -17,8 +17,8 @@ database.loadDatabase();
 
 app.post('/addChar', async (req, res) =>{
     const data = req.body;
-    const server = data.ServerName;
-    const charname = data.CharName;
+    const server = data.ServerName.toLowerCase();
+    const charname = data.CharName.toLowerCase();
 
     if(server && charname) {
         const fetch_response = await fetch(`https://eu.api.blizzard.com/profile/wow/character/${server}/${charname}?namespace=profile-eu&locale=en_GB&access_token=${apiKey}`);
@@ -28,7 +28,7 @@ app.post('/addChar', async (req, res) =>{
         } else {
             database.count({CharName: charname, ServerName: server}, (err, count) => {
                 if (count < 1) {
-                    database.insert(data);
+                    database.insert({ServerName: server, CharName: charname});
                 }
             });
         }
@@ -39,12 +39,13 @@ app.post('/addChar', async (req, res) =>{
 app.get('/getData', async (request, response) => {
     const charData = [] ;
     let charCount = 0;
-
     database.count({},(err, count) => {
         charCount = count;
     })
 
     database.find({},async (err, data) => {
+
+
         if(err){
             response.end();
             return;
@@ -60,14 +61,16 @@ app.get('/getData', async (request, response) => {
                 ServerName: json.realm.name,
                 Itemlvl: json.average_item_level,
                 Class: json.character_class.name,
-                Spec: json.active_spec.name
+                Spec: json.active_spec.name,
+                Covenant: json.covenant_progress.chosen_covenant.name,
+                Renown: json.covenant_progress.renown_level
             }
             charData.push(player);
         }
         charData.sort(((a, b) => {
             return a.Itemlvl - b.Itemlvl
         }))
-        console.log(charData);
+        //console.log(charData);
         response.json(charData);
     })
 });
