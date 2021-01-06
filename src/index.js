@@ -31,6 +31,8 @@ app.use(express.json({limit:'2mb'}));
 
 const database = new Datastore({filename: 'database.db'});
 database.loadDatabase();
+const allDataDB = new Datastore({filename: 'allDataDB.db'});
+allDataDB.loadDatabase();
 
 app.get('/getChar', async (request, response) => {
     const character = await characterService.getBlizzardCharakter('frostwolf','youkago');
@@ -44,77 +46,79 @@ app.post('/addChar', async (req, res) =>{
     console.log(charname);
     if(server && charname) {
         const oauthToken = await oauthClient.getToken();
-        const fetch_response = await fetch(`https://eu.api.blizzard.com/profile/wow/character/${server}/${charname}?namespace=profile-eu&locale=en_GB&access_token=${oauthToken}`);
-        const json = await fetch_response.json();
-        if (json.code) {
-            console.log(json);
-        } else {
-            database.count({CharName: charname, ServerName: server}, (err, count) => {
+        try{
+            const player = await characterService.getCharakter(server, charname, oauthToken);
+            allDataDB.count({CharName: player.CharName, ServerName: player.ServerName}, (err, count) => {
                 if (count < 1) {
-                    database.insert({ServerName: server, CharName: charname});
+                    console.log(player);
+                    allDataDB.insert(player);
                 }
             });
+        }catch (error){
+            console.log(error);
         }
+
         res.end();
     }
 });
 
 app.get('/getData', async (request, response) => {
-    const charData = [] ;
     let charCount = 0;
-    database.count({},(err, count) => {
+    allDataDB.count({},(err, count) => {
         charCount = count;
     })
 
-    database.find({},async (err, data) => {
+    allDataDB.find({},async (err, data) => {
 
+        if(err) {
+            response.end();
+            return;
+        }
 
-        if(err){
+        data.sort(((a, b) => {
+            return a.Itemlvl - b.Itemlvl
+        }))
+        console.log(data);
+        response.json(data);
+    })
+});
+
+app.get('/refresh', async (request, response) => {
+    const charData = [] ;
+    let charCount = 0;
+    allDataDB.count({},(err, count) => {
+        charCount = count;
+    })
+
+    allDataDB.find({},async (err, data) => {
+        if (err) {
             response.end();
             return;
         }
         const oauthToken = await oauthClient.getToken();
 
-        for(let i = 0; i< charCount;i++){
+        for (let i = 0; i < charCount; i++) {
             let item = data[i];
-            const server = item.ServerName;
-            const charname = item.CharName;
+            const server = item.ServerName.toLowerCase();
+            const charname = item.CharName.toLowerCase();
 
-            let json;
-            try{
-                 json = await characterService.getBlizzardCharakter(server,charname,oauthToken)
-            }catch (error){
-                console.log('fehler!!!!!!!!!!!!!!!!!!!!!!')
+            let player;
+            try {
+                player = await characterService.getCharakter(server, charname, oauthToken);
+            } catch (error) {
+                console.log(`Fehler beim Laden eines Chars(${charname})`);
                 const data = {
-                    status: fetch_response.status,
-                    statusText: fetch_response.statusText
+                    status: error.status,
+                    statusText: error.statusText
                 };
                 response.json(data);
                 return;
             }
-
-
-
-
-            const fetch_response_mplus = await fetch(`https://raider.io/api/v1/characters/profile?region=eu&realm=${server}&name=${charname}&fields=gear%2Ccovenant%2Cmythic_plus_scores`);
-            const json_mplus = await fetch_response_mplus.json();
-
-            const player = {
-                CharName: json.name,
-                ServerName: json.realm.name,
-                Itemlvl: json.average_item_level,
-                Class: json.character_class.name,
-                Spec: json.active_spec.name,
-                Covenant: json.covenant_progress.chosen_covenant.name,
-                Renown: json.covenant_progress.renown_level,
-                MplusScore: json_mplus.mythic_plus_scores.all || 0
-            }
-            charData.push(player);
+            console.log(player);
+            allDataDB.update({ CharName: player.CharName }, { $set: { Itemlvl: player.Itemlvl, Spec: player.Spec, Class: player.Class, Covenant: player.Covenant, Renown: player.Renown, MplusScore: player.MplusScore } }, { multi: false }, function (err, numReplaced) {
+                console.log(numReplaced);
+            });
         }
-        charData.sort(((a, b) => {
-            return a.Itemlvl - b.Itemlvl
-        }))
-        //console.log(charData);
-        response.json(charData);
-    })
+        response.json({status:200});
+    });
 });

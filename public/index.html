@@ -11,12 +11,16 @@
 <body>
     <!--img style="transform: rotate(180deg);" alt="Vue logo" src="assets/logo.png"-->
     <h1 class="header">Absolution - The Final Chapter</h1>
-    <button class="btn btn-default" onclick="toggleEdit()" style="text-align: left">Edit Mode</button>
+    <div class="col-md-4" style="text-align: left">
+        <button class="btn btn-default " onclick="toggleEdit()" style="text-align: left">Edit Mode</button>
+        <button class="btn btn-default " onclick="refresh()" style="text-align: left">Refresh Data</button>
+    </div>
     <div class="row" id="AddDialog" style="display:none">
         <input class="form-control col-md-2" placeholder="Server" type="text" id="servername"/>
         <input class="form-control col-md-2" placeholder="Charakter Name" type="text" id="charname"/>
         <button class="btn btn-default"  onclick="addChar()">Hinzufügen</button>
     </div>
+    
     <br/>
     <br/>
 <script>
@@ -25,8 +29,13 @@
         toggle(edit);
     }
 
-
- function addChar(){
+    async function refresh(){
+        await fetch('/refresh').then(response =>  {
+            alert('Daten erfolgreich aktualisiert!')
+        });
+        await getData();
+    }
+  async function addChar(){
      const tbName =document.getElementById('charname');
      const tbServer =document.getElementById('servername');
      const name = tbName.value;
@@ -42,12 +51,12 @@
          },
          body: JSON.stringify(data)
      }
-     fetch('/addChar',options).then(response => {
+     await fetch('/addChar',options).then(response => {
          console.log(response);
      });
      tbName.value = '';
      tbServer.value = '';
-     getData();
+     await getData();
  }
 
 getData();
