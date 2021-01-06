@@ -56,6 +56,13 @@ getData();
      const data = await response.json();
      console.log(data);
 
+     if(data.status){
+         const info = document.createElement('h4');
+         info.textContent = `Failed to load data from Blizzard API! Error ${data.status}, ${data.statusText}`;
+         document.body.append(info);
+         return;
+     }
+
      const element = document.getElementById('table')
      if(element){
          element.remove();

@@ -1,9 +1,25 @@
 const express = require('express');
 const Datastore = require('nedb');
 const fetch = require("node-fetch");
+const CharacterService = require("./services/charakterService");
+const OauthClient = require("./oauth/client.js");
 require('dotenv').config();
 
-const apiKey = process.env.API_KEY;
+
+
+const oauthOptions = {
+    client: {
+        id: process.env.CLIENT_ID,
+        secret: process.env.CLIENT_SECRET
+    },
+    auth: {
+        tokenHost: process.env.OAUTH_TOKEN_HOST || "https://eu.battle.net"
+    }
+};
+
+const oauthClient = new OauthClient({ oauthOptions });
+const characterService = new CharacterService(oauthClient);
+
 const port = process.env.PORT || 8080;
 
 const app = express();
@@ -12,8 +28,14 @@ app.use(express.static('public'));
 app.use(express.json({limit:'2mb'}));
 
 
+
 const database = new Datastore({filename: 'database.db'});
 database.loadDatabase();
+
+app.get('/getChar', async (request, response) => {
+    const character = await characterService.getBlizzardCharakter('frostwolf','youkago');
+    response.json(character);
+});
 
 app.post('/addChar', async (req, res) =>{
     const data = req.body;
@@ -21,7 +43,8 @@ app.post('/addChar', async (req, res) =>{
     const charname = data.CharName.toLowerCase();
     console.log(charname);
     if(server && charname) {
-        const fetch_response = await fetch(`https://eu.api.blizzard.com/profile/wow/character/${server}/${charname}?namespace=profile-eu&locale=en_GB&access_token=${apiKey}`);
+        const oauthToken = await oauthClient.getToken();
+        const fetch_response = await fetch(`https://eu.api.blizzard.com/profile/wow/character/${server}/${charname}?namespace=profile-eu&locale=en_GB&access_token=${oauthToken}`);
         const json = await fetch_response.json();
         if (json.code) {
             console.log(json);
@@ -50,14 +73,30 @@ app.get('/getData', async (request, response) => {
             response.end();
             return;
         }
+        const oauthToken = await oauthClient.getToken();
+
         for(let i = 0; i< charCount;i++){
             let item = data[i];
             const server = item.ServerName;
             const charname = item.CharName;
-            const fetch_response = await fetch(`https://eu.api.blizzard.com/profile/wow/character/${server}/${charname}?namespace=profile-eu&locale=en_GB&access_token=${apiKey}`);
-            const json = await fetch_response.json();
 
-            const fetch_response_mplus = await fetch(`https://raider.io/api/v1/characters/profile?region=eu&realm=${server}&name=${charname}&fields=mythic_plus_scores`);
+            let json;
+            try{
+                 json = await characterService.getBlizzardCharakter(server,charname,oauthToken)
+            }catch (error){
+                console.log('fehler!!!!!!!!!!!!!!!!!!!!!!')
+                const data = {
+                    status: fetch_response.status,
+                    statusText: fetch_response.statusText
+                };
+                response.json(data);
+                return;
+            }
+
+
+
+
+            const fetch_response_mplus = await fetch(`https://raider.io/api/v1/characters/profile?region=eu&realm=${server}&name=${charname}&fields=gear%2Ccovenant%2Cmythic_plus_scores`);
             const json_mplus = await fetch_response_mplus.json();
 
             const player = {
